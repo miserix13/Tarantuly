@@ -1,0 +1,15 @@
+@using MudBlazor
+<MudForm @ref="_form">
+  <MudStack Spacing="2">
+    <MudTextField T="string" Label="IsDeleted" Value="@Model.IsDeleted?.ToString()" Disabled="true" />
+    <MudTextField T="string" Label="Name" @bind-Value="Model.Name" Required="true" />
+    <MudNumericField T="decimal" Label="Price" @bind-Value="Model.Price" Required="true" />
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">Save</MudButton>
+  </MudStack>
+</MudForm>
+@code {
+  private MudForm? _form;
+  [Parameter] public Tarantuly.SampleApp.Data.Product Model { get; set; } = default!;
+  [Parameter] public EventCallback OnSave { get; set; }
+  private async Task SaveAsync() => await OnSave.InvokeAsync();
+}

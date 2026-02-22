@@ -1,0 +1,27 @@
+@using MudBlazor
+<MudText Typo="Typo.h5">Product Details</MudText>
+<MudPaper Class="pa-4" Elevation="0">
+  <MudStack Row="true" Class="mb-2">
+    <MudText Typo="Typo.subtitle2" Class="me-2">Id:</MudText>
+    <MudText Typo="Typo.body2">@Model.Id</MudText>
+  </MudStack>
+  <MudStack Row="true" Class="mb-2">
+    <MudText Typo="Typo.subtitle2" Class="me-2">IsDeleted:</MudText>
+    <MudText Typo="Typo.body2">@Model.IsDeleted</MudText>
+  </MudStack>
+  <MudStack Row="true" Class="mb-2">
+    <MudText Typo="Typo.subtitle2" Class="me-2">Name:</MudText>
+    <MudText Typo="Typo.body2">@Model.Name</MudText>
+  </MudStack>
+  <MudStack Row="true" Class="mb-2">
+    <MudText Typo="Typo.subtitle2" Class="me-2">Price:</MudText>
+    <MudText Typo="Typo.body2">@Model.Price</MudText>
+  </MudStack>
+  <MudStack Row="true" Class="mb-2">
+    <MudText Typo="Typo.subtitle2" Class="me-2">RowVersion:</MudText>
+    <MudText Typo="Typo.body2">@Model.RowVersion</MudText>
+  </MudStack>
+</MudPaper>
+@code {
+  [Parameter] public Tarantuly.SampleApp.Data.Product Model { get; set; } = default!;
+}

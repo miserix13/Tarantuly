@@ -47,3 +47,22 @@ Current context creation support:
 
 - parameterless `DbContext` constructor
 - design-time factory with `CreateDbContext(string[])`
+
+## End-to-end sample in this repo
+
+This solution includes `src/Tarantuly.SampleApp` with:
+
+- `Data/AppDbContext.cs`
+- `Data/Product.cs`
+
+Run generation against the sample app:
+
+```bash
+dotnet run --project src/Tarantuly.Cli -- scaffold --project src/Tarantuly.SampleApp/Tarantuly.SampleApp.csproj --context AppDbContext --output GeneratedSample --namespace Tarantuly.Generated
+```
+
+Expected output files:
+
+- `GeneratedSample/Product/ProductList.razor`
+- `GeneratedSample/Product/ProductDetails.razor`
+- `GeneratedSample/Product/ProductUpsert.razor`

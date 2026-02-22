@@ -55,7 +55,7 @@ if (string.IsNullOrWhiteSpace(assemblyPath) || !File.Exists(assemblyPath))
 
 Directory.CreateDirectory(outputDir);
 
-var loadContext = new ProjectAssemblyLoadContext(Path.GetDirectoryName(assemblyPath)!);
+var loadContext = new ProjectAssemblyLoadContext(assemblyPath);
 try
 {
     var appAssembly = loadContext.LoadFromAssemblyPath(assemblyPath);
@@ -201,8 +201,7 @@ static string? ResolveBuiltAssemblyPath(string projectPath)
 
 static Type? ResolveDbContextType(Assembly assembly, string contextName)
 {
-    return assembly
-        .GetTypes()
+    return GetLoadableTypes(assembly)
         .Where(type => !type.IsAbstract && typeof(DbContext).IsAssignableFrom(type))
         .FirstOrDefault(type => type.FullName?.Equals(contextName, StringComparison.Ordinal) == true
                                 || type.Name.Equals(contextName, StringComparison.Ordinal));
@@ -216,8 +215,7 @@ static DbContext? CreateDbContextInstance(Assembly assembly, Type dbContextType)
         return parameterlessConstructor.Invoke([]) as DbContext;
     }
 
-    var factoryInstance = assembly
-        .GetTypes()
+    var factoryInstance = GetLoadableTypes(assembly)
         .Where(type => !type.IsAbstract && !type.IsInterface)
         .Select(type => new
         {
@@ -249,12 +247,45 @@ static DbContext? CreateDbContextInstance(Assembly assembly, Type dbContextType)
     return createMethod.Invoke(factory, [Array.Empty<string>()]) as DbContext;
 }
 
-file sealed class ProjectAssemblyLoadContext(string baseDirectory) : AssemblyLoadContext(isCollectible: true)
+static IReadOnlyList<Type> GetLoadableTypes(Assembly assembly)
 {
-    private readonly string _baseDirectory = baseDirectory;
+    try
+    {
+        return assembly.GetTypes();
+    }
+    catch (ReflectionTypeLoadException exception)
+    {
+        return exception.Types.Where(type => type is not null).Cast<Type>().ToArray();
+    }
+}
+
+file sealed class ProjectAssemblyLoadContext : AssemblyLoadContext
+{
+    private readonly AssemblyDependencyResolver _resolver;
+    private readonly string _baseDirectory;
+
+    public ProjectAssemblyLoadContext(string mainAssemblyPath)
+        : base(isCollectible: true)
+    {
+        _resolver = new AssemblyDependencyResolver(mainAssemblyPath);
+        _baseDirectory = Path.GetDirectoryName(mainAssemblyPath) ?? AppContext.BaseDirectory;
+    }
 
     protected override Assembly? Load(AssemblyName assemblyName)
     {
+        if (assemblyName.Name is not null
+            && (assemblyName.Name.Equals("Microsoft.EntityFrameworkCore", StringComparison.Ordinal)
+                || assemblyName.Name.Equals("Microsoft.EntityFrameworkCore.Abstractions", StringComparison.Ordinal)))
+        {
+            return null;
+        }
+
+        var resolvedPath = _resolver.ResolveAssemblyToPath(assemblyName);
+        if (!string.IsNullOrWhiteSpace(resolvedPath) && File.Exists(resolvedPath))
+        {
+            return LoadFromAssemblyPath(resolvedPath);
+        }
+
         var candidatePath = Path.Combine(_baseDirectory, $"{assemblyName.Name}.dll");
         if (File.Exists(candidatePath))
         {

@@ -2,4 +2,5 @@
   <Project Path="Tarantuly.csproj" />
   <Project Path="src/Tarantuly.Generator/Tarantuly.Generator.csproj" />
   <Project Path="src/Tarantuly.Cli/Tarantuly.Cli.csproj" />
+  <Project Path="src/Tarantuly.SampleApp/Tarantuly.SampleApp.csproj" />
 </Solution>
