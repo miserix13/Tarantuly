@@ -12,6 +12,7 @@ public sealed class MudBlazorUpsertTemplate : ICrudTemplate
     {
         var entity = context.Entity;
         var editableProperties = entity.Properties.Where(IsEditable).ToArray();
+        var keyType = ResolveKeyType(entity);
         if (editableProperties.Length == 0)
         {
             return [];
@@ -21,6 +22,8 @@ public sealed class MudBlazorUpsertTemplate : ICrudTemplate
 
         var builder = new StringBuilder();
         builder.AppendLine("@using MudBlazor");
+        builder.AppendLine("@using Tarantuly.Abstractions");
+        builder.AppendLine($"@inject ICrudDataService<{entity.FullName}, {keyType}> DataService");
         builder.AppendLine("<MudForm @ref=\"_form\">");
         builder.AppendLine("  <MudStack Spacing=\"2\">");
 
@@ -38,13 +41,13 @@ public sealed class MudBlazorUpsertTemplate : ICrudTemplate
                 continue;
             }
 
-            if (property.TypeName is "System.DateTime" or "System.DateTimeOffset")
+            if (property.TypeName is "System.DateTime")
             {
                 builder.AppendLine($"    <MudDatePicker Label=\"{property.Name}\" @bind-Date=\"Model.{property.Name}\" />");
                 continue;
             }
 
-            builder.AppendLine($"    <MudTextField T=\"string\" Label=\"{property.Name}\" Value=\"@Model.{property.Name}?.ToString()\" Disabled=\"true\" />");
+            builder.AppendLine($"    <MudTextField T=\"string\" Label=\"{property.Name}\" Value=\"@Convert.ToString(Model.{property.Name})\" Disabled=\"true\" />");
         }
 
         builder.AppendLine("    <MudButton Variant=\"Variant.Filled\" Color=\"Color.Primary\" OnClick=\"SaveAsync\">Save</MudButton>");
@@ -53,8 +56,23 @@ public sealed class MudBlazorUpsertTemplate : ICrudTemplate
         builder.AppendLine("@code {");
         builder.AppendLine("  private MudForm? _form;");
         builder.AppendLine($"  [Parameter] public {entity.FullName} Model {{ get; set; }} = default!;");
-        builder.AppendLine("  [Parameter] public EventCallback OnSave { get; set; }");
-        builder.AppendLine("  private async Task SaveAsync() => await OnSave.InvokeAsync();");
+        builder.AppendLine("  [Parameter] public bool IsEditMode { get; set; }");
+        builder.AppendLine($"  [Parameter] public EventCallback<{entity.FullName}> OnSaved {{ get; set; }}");
+        builder.AppendLine("  private async Task SaveAsync()");
+        builder.AppendLine("  {");
+        builder.AppendLine("    if (_form is not null)");
+        builder.AppendLine("    {");
+        builder.AppendLine("      await _form.Validate();");
+        builder.AppendLine("      if (!_form.IsValid)");
+        builder.AppendLine("      {");
+        builder.AppendLine("        return;");
+        builder.AppendLine("      }");
+        builder.AppendLine("    }");
+        builder.AppendLine("    var saved = IsEditMode");
+        builder.AppendLine("      ? await DataService.UpdateAsync(Model)");
+        builder.AppendLine("      : await DataService.CreateAsync(Model);");
+        builder.AppendLine("    await OnSaved.InvokeAsync(saved);");
+        builder.AppendLine("  }");
         builder.AppendLine("}");
 
         return [new CrudFileOutput(path, builder.ToString())];
@@ -78,5 +96,10 @@ public sealed class MudBlazorUpsertTemplate : ICrudTemplate
             "System.Double" or "double" => "double",
             _ => "decimal",
         };
+    }
+
+    private static string ResolveKeyType(CrudEntityModel entity)
+    {
+        return entity.Properties.FirstOrDefault(property => property.Kind == CrudPropertyKind.Key)?.TypeName ?? "int";
     }
 }

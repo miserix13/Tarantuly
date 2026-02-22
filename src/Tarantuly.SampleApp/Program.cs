@@ -1,6 +1,8 @@
 using Tarantuly.SampleApp.Components;
 using Tarantuly.SampleApp.Data;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
+using Tarantuly.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase("SampleAppDb"));
+builder.Services.AddMudServices();
+builder.Services.AddScoped<ICrudDataService<Product, int>, ProductCrudDataService>();
 
 var app = builder.Build();
 

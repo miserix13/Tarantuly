@@ -43,6 +43,15 @@ Current generated templates:
 - `*Details.razor`
 - `*Upsert.razor`
 
+Generated components are now strongly typed (`TEntity`) and inject:
+
+- `ICrudDataService<TEntity, TKey>` from `Tarantuly.Abstractions`
+
+Hook parameters included in generated components:
+
+- list: `OnDetails`, `OnEdit`
+- upsert: `OnSaved`, `IsEditMode`
+
 Current context creation support:
 
 - parameterless `DbContext` constructor
@@ -54,15 +63,22 @@ This solution includes `src/Tarantuly.SampleApp` with:
 
 - `Data/AppDbContext.cs`
 - `Data/Product.cs`
+- `Data/ProductCrudDataService.cs` (`ICrudDataService<Product, int>` implementation)
 
-Run generation against the sample app:
+Generate components directly into the sample app project:
 
 ```bash
-dotnet run --project src/Tarantuly.Cli -- scaffold --project src/Tarantuly.SampleApp/Tarantuly.SampleApp.csproj --context AppDbContext --output GeneratedSample --namespace Tarantuly.Generated
+dotnet run --project src/Tarantuly.Cli -- scaffold --project src/Tarantuly.SampleApp/Tarantuly.SampleApp.csproj --context AppDbContext --output src/Tarantuly.SampleApp/Components/Generated --namespace Tarantuly.SampleApp.Components.Generated
 ```
 
-Expected output files:
+Expected generated files:
 
-- `GeneratedSample/Product/ProductList.razor`
-- `GeneratedSample/Product/ProductDetails.razor`
-- `GeneratedSample/Product/ProductUpsert.razor`
+- `src/Tarantuly.SampleApp/Components/Generated/Product/ProductList.razor`
+- `src/Tarantuly.SampleApp/Components/Generated/Product/ProductDetails.razor`
+- `src/Tarantuly.SampleApp/Components/Generated/Product/ProductUpsert.razor`
+
+Run the sample app and open `/products`:
+
+```bash
+dotnet run --project src/Tarantuly.SampleApp
+```

@@ -1,0 +1,70 @@
+@page "/products"
+@using Tarantuly.SampleApp.Components.Generated.Product
+@using Tarantuly.SampleApp.Data
+
+<PageTitle>Products</PageTitle>
+
+<h1>Products</h1>
+
+<p>
+    <button class="btn btn-primary" @onclick="StartCreate">New Product</button>
+</p>
+
+<ProductList @key="_listVersion" OnDetails="HandleDetails" OnEdit="HandleEdit" />
+
+@if (_selectedProductId.HasValue)
+{
+    <h2>Details</h2>
+    <ProductDetails Id="_selectedProductId.Value" />
+}
+
+<h2>@(_isEditMode ? "Edit" : "Create")</h2>
+<ProductUpsert Model="_workingModel" IsEditMode="_isEditMode" OnSaved="HandleSaved" />
+
+@code {
+    private int _listVersion;
+    private bool _isEditMode;
+    private int? _selectedProductId;
+    private Product _workingModel = new();
+
+    private Task HandleDetails(Product model)
+    {
+        _selectedProductId = model.Id;
+        return Task.CompletedTask;
+    }
+
+    private Task HandleEdit(Product model)
+    {
+        _isEditMode = true;
+        _workingModel = Clone(model);
+        _selectedProductId = model.Id;
+        return Task.CompletedTask;
+    }
+
+    private Task HandleSaved(Product model)
+    {
+        _isEditMode = false;
+        _workingModel = new Product();
+        _selectedProductId = model.Id;
+        _listVersion++;
+        return Task.CompletedTask;
+    }
+
+    private void StartCreate()
+    {
+        _isEditMode = false;
+        _workingModel = new Product();
+    }
+
+    private static Product Clone(Product model)
+    {
+        return new Product
+        {
+            Id = model.Id,
+            Name = model.Name,
+            Price = model.Price,
+            IsDeleted = model.IsDeleted,
+            RowVersion = model.RowVersion,
+        };
+    }
+}
