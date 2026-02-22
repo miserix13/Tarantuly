@@ -7,14 +7,14 @@ A framework for generating CRUD Blazor components in an ASP.NET Core web app usi
 This repository now contains an initial three-project scaffold:
 
 - `Tarantuly` (core library)
-	- CRUD entity contracts and options attributes
-	- EF Core metadata discovery (`EfCrudModelDiscovery`)
-	- generation pipeline abstractions (`ICrudTemplate`, `CrudGenerationEngine`)
-	- first MudBlazor list template (`MudBlazorListTemplate`)
+  - CRUD entity contracts and options attributes
+  - EF Core metadata discovery (`EfCrudModelDiscovery`)
+  - generation pipeline abstractions (`ICrudTemplate`, `CrudGenerationEngine`)
+  - first MudBlazor list template (`MudBlazorListTemplate`)
 - `src/Tarantuly.Generator` (Roslyn source generator skeleton)
-	- emits a generated marker class to validate analyzer wiring
+  - emits a generated marker class to validate analyzer wiring
 - `src/Tarantuly.Cli` (CLI scaffold skeleton)
-	- provides `scaffold` command and writes generated files to disk
+  - provides `scaffold` command and writes generated files to disk
 
 ## Quick start
 
