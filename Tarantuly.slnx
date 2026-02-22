@@ -1,3 +1,5 @@
 <Solution>
   <Project Path="Tarantuly.csproj" />
+  <Project Path="src/Tarantuly.Generator/Tarantuly.Generator.csproj" />
+  <Project Path="src/Tarantuly.Cli/Tarantuly.Cli.csproj" />
 </Solution>

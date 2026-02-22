@@ -1,0 +1,12 @@
+@using MudBlazor
+<MudText Typo="Typo.h5">Sample Entity</MudText>
+<MudTable Items="@Items" Dense="true" Hover="true"> 
+    <HeaderContent>
+        <MudTh>Id</MudTh>
+        <MudTh>Name</MudTh>
+        <MudTh>RowVersion</MudTh>
+    </HeaderContent>
+</MudTable>
+@code {
+    private readonly List<object> Items = []; 
+}
